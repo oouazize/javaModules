@@ -112,9 +112,10 @@ public class Menu {
         }
     }
     
-    private void displayTransaction(Transaction t) {
-        System.out.print("To " + t.getRecipient().getName());
-        System.out.print("(id = " + t.getRecipient().getId());
+    private void displayTransaction(Transaction t, int userId) {
+        User recipientUser = t.getRecipient().getId() == userId ? t.getSender() : t.getRecipient();
+        System.out.print("To " + recipientUser.getName());
+        System.out.print("(id = " + recipientUser.getId());
         System.out.print(") =" + t.getAmount());
         System.out.println(" with id = " + t.getId());
     }
@@ -128,7 +129,7 @@ public class Menu {
             try {
                 Transaction[] arr = transactionsService.getUserTransactions(userId);
                 for (Transaction t : arr) {
-                    displayTransaction(t);
+                    displayTransaction(t, userId);
                 }
             }
             catch (Exception e) {
@@ -148,8 +149,9 @@ public class Menu {
             UUID transferId = UUID.fromString(transferIdString);
             try {
                 Transaction removedTransaction = transactionsService.removeTransaction(userId, transferId);
-                User recipient = removedTransaction.getRecipient();
-                System.out.println("Transfer To " + recipient.getName() + "(id = " + recipient.getId() + ") " + removedTransaction.getAmount() + " removed");
+                User displayedUser = removedTransaction.getRecipient().getId() == userId ? removedTransaction.getSender() : removedTransaction.getRecipient();
+                String Transfertype = removedTransaction.getRecipient().getId() == userId ? "From " : "To ";
+                System.out.println("Transfer " + Transfertype + displayedUser.getName() + "(id = " + displayedUser.getId() + ") " + removedTransaction.getAmount() + " removed");
             }
             catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
@@ -164,6 +166,19 @@ public class Menu {
         for (Transaction t : unpairedTransactions) {
             User sendUser = t.getSender();
             User recipientUser = t.getRecipient();
+            Transaction[] senderTransactions = sendUser.getTransactions();
+            // Check if the transaction is unacknowledged by the recipient
+            boolean isUnacknowledged = true;
+            for (Transaction senderTransaction : senderTransactions) {
+                if (senderTransaction.getId() == t.getId()) {
+                    isUnacknowledged = false;
+                    break;
+                }
+            }
+            if (isUnacknowledged) {
+                sendUser = t.getRecipient();
+                recipientUser = t.getSender();
+            }
             System.out.println(sendUser.getName() + "(id = " + sendUser.getId() + ") has an unacknowledged transfer id = " + t.getId() + " from " + recipientUser.getName() + "(id = " + recipientUser.getId() + ") for " + t.getAmount());
         }
     }
