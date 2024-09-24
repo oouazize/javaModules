@@ -27,7 +27,9 @@ public class Transaction {
 
         if (category == Category.DEBITS) {
             sender.setBalance(sender.getBalance() - amount);
+            recipient.setBalance(recipient.getBalance() + amount);
         } else {
+            recipient.setBalance(recipient.getBalance() - amount);
             sender.setBalance(sender.getBalance() + amount);
         }
     }

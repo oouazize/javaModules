@@ -1,6 +1,9 @@
 package ex04;
 
 import java.util.UUID;
+
+import javax.swing.plaf.synth.SynthStyle;
+
 import ex03.UsersList;
 import ex03.Transaction;
 import ex03.TransactionsLinkedList;
@@ -38,11 +41,10 @@ public class TransactionsService {
             throw new IllegalTransactionException("Insufficient balance for the transaction.");
         }
 
-        Transaction debitTransaction = new Transaction(sender, receiver, Transaction.Category.DEBITS, amount);
-        Transaction creditTransaction = new Transaction(debitTransaction.getId(), receiver, sender, Transaction.Category.CREDITS, amount);
+        Transaction transaction = new Transaction(sender, receiver, Transaction.Category.DEBITS, amount);
 
-        sender.addTransaction(debitTransaction);
-        receiver.addTransaction(creditTransaction);
+        sender.addTransaction(transaction);
+        receiver.addTransaction(transaction);
     }
 
     public Transaction[] getUserTransactions(int userId) {
@@ -63,12 +65,12 @@ public class TransactionsService {
             // For each transaction of the user
             for (Transaction transaction : transactions) {
                 User recipient = transaction.getRecipient();
-                Transaction[] recipientTransactions = recipient.getTransactions();
+                User sender = transaction.getSender();
+                User oppositeUser = user.getId() == recipient.getId() ? sender : recipient;
+                Transaction[] oppositeTransactions = oppositeUser.getTransactions();
                 boolean paired = false;
-                for (Transaction recipientTransaction : recipientTransactions) {
-                    if (transaction.getSender().equals(recipientTransaction.getRecipient())
-                            && transaction.getRecipient().equals(recipientTransaction.getSender())
-                            && transaction.getAmount() == recipientTransaction.getAmount()) {
+                for (Transaction oppositeTransaction : oppositeTransactions) {
+                    if (transaction.getId().equals(oppositeTransaction.getId())) {
                         paired = true;
                         break;
                     }

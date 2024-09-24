@@ -9,13 +9,13 @@ public class Program {
         System.out.println(john);
         System.out.println(mike);
 
-        Transaction transaction1 = new Transaction(john, mike, Transaction.Category.DEBITS, 200);
+        Transaction transaction = new Transaction(john, mike, Transaction.Category.DEBITS, 200);
 
         System.out.println("\nAfter transaction:");
         System.out.println(john);
         System.out.println(mike);
 
         System.out.println("\nTransaction details:");
-        System.out.println(transaction1);
+        System.out.println(transaction);
     }
 }
